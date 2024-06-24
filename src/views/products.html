@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Page</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(to bottom right, #f0f4f8, #d9e2ec);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #header {
+            width: 100%;
+            background-color: #007bff;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #header h1 {
+            margin: 0;
+            flex: 1;
+            text-align: left;
+            padding-left: 20px;
+        }
+
+        #search-bar {
+            flex: 2;
+            display: flex;
+            justify-content: center;
+        }
+
+        #search-bar input[type="text"] {
+            width: 70%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px 0 0 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        #search-bar input[type="submit"] {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            background-color: #0056b3;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #search-bar input[type="submit"]:hover{
+            background-color: #0a4d95;
+
+        }
+
+        #products {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .product-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: calc(33.333% - 40px);
+            max-width: 300px;
+            box-sizing: border-box;
+        }
+
+        .product-card img {
+            width: 100%;
+            height: auto;
+        }
+
+        .product-info {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .product-info h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .product-info p {
+            margin: 0 0 20px 0;
+            color: #555;
+        }
+
+        .product-info button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .product-info button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+        #search-bar input[type="text"]:focus{
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            outline: none;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .product-card {
+                width: calc(50% - 40px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-card {
+                width: 100%;
+            }
+
+            #search-bar input[type="text"] {
+                width: 60%;
+            }
+
+            #search-bar input[type="submit"] {
+                width: 30%;
+            }
+            #header h1{
+               display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>Our Products</h1>
+        <div id="search-bar">
+            <input type="text" placeholder="Search products...">
+            <input type="submit" value="Search">
+        </div>
+    </div>
+    
+    <div id="products">
+        <div class="product-card">
+            <img src="https://via.placeholder.com/300x200" alt="Product 1">
+            <div class="product-info">
+                <h3>Product 1</h3>
+                <p>Description of Product 1.</p>
+                <button>Add to Cart</button>
+            </div>
+        </div>
+        
+        <div class="product-card">
+            <img src="https://via.placeholder.com/300x200" alt="Product 2">
+            <div class="product-info">
+                <h3>Product 2</h3>
+                <p>Description of Product 2.</p>
+                <button>Add to Cart</button>
+            </div>
+        </div>
+
+        <div class="product-card">
+            <img src="https://via.placeholder.com/300x200" alt="Product 3">
+            <div class="product-info">
+                <h3>Product 3</h3>
+                <p>Description of Product 3.</p>
+                <button>Add to Cart</button>
+            </div>
+        </div>
+        
+        <!-- Add more products as needed -->
+    </div>
+</body>
+</html>

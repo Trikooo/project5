@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(to bottom right, #f0f4f8, #d9e2ec);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #left-content {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #left-content h1 {
+            font-size: 5em;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            transition: transform 0.5s; /* Added transition for smooth effect */
+            padding-top: 50px; /* Adjust padding top as desired */
+            padding-bottom: 50px; /* Adjust padding bottom as desired */
+        }
+
+        #right-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0 20px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            outline: none;
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        /* Sign-in link styles */
+        #signin-link {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div id="left-content">
+        <h1 id="title">Welcome to our <span style="color: #007bff;">Registration</span> Page!</h1>
+        <p style="font-size: 1.5em; color: #555;">Register now to unlock amazing features and exclusive content!</p>
+    </div>
+    <div id="right-content">
+        <form id="registrationForm" action="/register" method="POST">
+            <h2>Register</h2>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            
+            <label for="confirm_password">Confirm Password:</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
+            
+            <input type="submit" value="Register">
+        </form>
+    </div>
+    
+    <!-- Sign-in link -->
+    <a href="/login" id="signin-link">Sign In</a>
+
+    <script>
+        const title = document.getElementById('title');
+        const sensitivity = 0.1; // Adjust this value for sensitivity
+        
+        title.addEventListener('mouseenter', () => {
+            document.addEventListener('mousemove', onMouseMove);
+        });
+        
+        title.addEventListener('mouseleave', () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            title.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+        });
+        
+        function onMouseMove(e) {
+            const offsetX = (e.clientX - title.offsetLeft - title.offsetWidth / 2) * sensitivity;
+            const offsetY = (e.clientY - title.offsetTop - title.offsetHeight / 2) * sensitivity * 5;
+            title.style.transform = `perspective(1000px) rotateX(${-offsetY}deg) rotateY(${offsetX}deg)`;
+        }
+    </script>
+</body>
+</html>

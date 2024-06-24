@@ -94,7 +94,13 @@ class Router {
    * @param {...Function} args - Middleware functions.
    */
   use(...args) {
-    this.routerMiddleware.push(...args);
+    for(const arg of args){
+      const routes = arg.routes
+      for(const route of routes){
+        this.routes.push(route)
+      }
+
+    }
   }
 }
 

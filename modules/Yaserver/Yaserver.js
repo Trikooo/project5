@@ -1,15 +1,16 @@
 const http = require("node:http");
 const fs = require("node:fs");
 const { parseUrl } = require("./urlParser");
-const hashing = require("./hashing");
 const { parseCookies, cookieStringifier } = require("./cookieManager");
+const { parse } = require("./dataParser");
+// const MultipartFormParser = require("../../modules/multipart/multipartParser.js");
 
 // Class definition for Yaserver
 class Yaserver {
   constructor() {
-    this.middleware = []; // Initialize an empty array to hold middleware functions
-    this.yaserver = http.createServer(); // Create an HTTP server instance
-    this.#superRes(); // Call the private method to extend the response object
+    this.middleware = [];
+    this.yaserver = http.createServer();
+    this.#superRes(); // extend the response object
   }
 
   // Private method to handle request based on URL, method, and middleware
@@ -23,11 +24,11 @@ class Yaserver {
         if (req.method === method && req.url.startsWith(pathWithoutParams)) {
           req.parsedUrl = parseUrl(req.url);
           params[splitUrl[1]] = req.url.replace(pathWithoutParams, "");
-          req.params = params; 
+          req.params = params;
           req.parsedUrl.params = params; // Attach parameters to the parsedUrl object as well
-          req.cookies = parseCookies(req); 
+          req.cookies = parseCookies(req);
           // Execute middleware
-          this.#excuteMiddleware(req, res, 0, requestMiddleware);
+          this.#executeMiddleware(req, res, 0, requestMiddleware);
         }
       });
     } else {
@@ -37,7 +38,7 @@ class Yaserver {
           req.params = {}; // No parameters for this URL
           req.cookies = parseCookies(req);
           // Execute middleware
-          this.#excuteMiddleware(req, res, 0, requestMiddleware);
+          this.#executeMiddleware(req, res, 0, requestMiddleware);
         }
       });
     }
@@ -77,17 +78,21 @@ class Yaserver {
 
     /**
      * Method to render HTML file.
-     * @param {string} data - The  relative or absoulte path of the HTML file to render.
+     * @param {string} fileName - The name of the HTML file to render
+     * @returns {void}
+     * @description The HTML file should be located in the "views" directory of the parent module.
      */
-    res.render = function (data) {
+    res.render = function (fileName) {
       if (!this.statusCode) {
         this.statusCode = 200; // Default status code
       }
-      this.writeHead(this.statusCode, { "Content-Type": "text/html" });
-      let htmlReadStream = fs.createReadStream(data);
+      const dataPath = module.parent.path + "/views/" + fileName;
+      let htmlReadStream = fs.createReadStream(dataPath);
       htmlReadStream.pipe(this);
+      htmlReadStream.on("error", (error) => {
+        this.status(500).json({ Error: `Couldn't read HTML file. ${error}` });
+      });
     };
-
     /**
      * Method to set response status code
      * @param {number} statusCode
@@ -134,8 +139,6 @@ class Yaserver {
      * @throws {Error} If either the key, value, or secretKey is not provided.
      */
     res.signedCookie = function (options = {}) {
-      console.log("inside res.signedCookie: ",options)
-
       if (!options.key || !options.value) {
         throw new Error("Both the key and value are require to set a cookie");
       }
@@ -147,12 +150,12 @@ class Yaserver {
   }
 
   // Private method to execute middleware functions
-  async #excuteMiddleware(req, res, index, requestMiddleware) {
+  async #executeMiddleware(req, res, index, requestMiddleware) {
     if (index === 0) this.middleware.push(...requestMiddleware);
 
     if (index < this.middleware.length) {
       const nextMiddleware = async () => {
-        await this.#excuteMiddleware(req, res, index + 1, requestMiddleware);
+        await this.#executeMiddleware(req, res, index + 1, requestMiddleware);
       };
       this.middleware[index](req, res, nextMiddleware); // Call current middleware
       if (index === this.middleware.length - 1) {
@@ -229,27 +232,18 @@ class Yaserver {
   }
 
   // Method to parse the request body
-  bodyParser(req, res, next) {
-    let body = "";
-    let parsedBody;
-    req.on("data", (chunk) => {
-      body = body + chunk;
-    });
-    req.on("end", () => {
-      if (req.headers["Content-type"] === "application/json") {
-        try {
-          parsedBody = JSON.parse(body);
-          req.body = parsedBody;
-          next();
-        } catch (error) {
-          res.status(500).json({ error: "Invalid JSON format" });
-          console.error("error parsing JSON", error);
-        }
-      } else {
-        req.body = body;
+bodyParser(req, res, next) {
+      let body = [];
+      req.on("data", (chunk) => {
+        body.push(chunk);
+      });
+
+      req.on("end", () => {
+        // eslint-disable-next-line no-undef
+        req.body = Buffer.concat(body).toString("latin1");
+        parse(req);
         next();
-      }
-    });
+      });
   }
 
   // Method to register router

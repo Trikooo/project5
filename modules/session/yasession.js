@@ -29,6 +29,9 @@ function yasession(options) {
     if(!options.cookie.secretKey) throw new Error("a secretKey for the session must be provided")
     return (req, res, next) => {
         res.signedCookie(options.cookie)
+        req.session = {
+          sid: options.cookie.value
+        }
         next()
     };
   }
