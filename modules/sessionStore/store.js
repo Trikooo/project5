@@ -1,24 +1,22 @@
 const Session = require("./models/session.model.js");
-const { isValidObjectId } = require("mongoose");
 class Store {
   constructor(mongoClient) {
     this.client = mongoClient;
     this.db = this.client.db();
   }
-  async get(id) {
-    if (!isValidObjectId(id)) return console.error("invalid session id");
+  async get(sid) {
     try {
-      const session = await Session.findById(id);
+      const session = await Session.findById(sid);
       return session ? session.data : null;
     } catch (error) {
       console.error(error);
       throw error;
     }
   }
-  async set(id, sessionData, expiration) {
+  async set(sid, sessionData, expiration) {
     try {
       await Session.updateOne(
-        { _id: id },
+        { _id: sid },
         { $set: { data: sessionData, expires: expiration } },
         { upsert: true }
       );
@@ -27,9 +25,9 @@ class Store {
       throw error;
     }
   }
-  async destroy(id) {
+  async destroy(sid) {
     try {
-      await Session.deleteOne({ _id: id });
+      await Session.deleteOne({ _id: sid });
     } catch (error) {
       console.error(error);
       throw error;

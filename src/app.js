@@ -15,6 +15,7 @@ app.use(
       maxAge: 30000,
       secretKey: "session_secret",
     },
+    store: clientPromise(),
   })
 );
 

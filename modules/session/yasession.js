@@ -1,3 +1,4 @@
+const Store = require("../sessionStore/store.js");
 const { generateId } = require("../Yaserver/hashing.js");
 
 /**
@@ -23,18 +24,31 @@ const { generateId } = require("../Yaserver/hashing.js");
  * @returns {function} Middleware function for session handling.
  */
 function yasession(options) {
-    if(!options.cookie.key) options.cookie.key = "connect.sid"
-    options.cookie.value = generateId()
-    if(!options.store) options.store = {}
-    if(!options.cookie.secretKey) throw new Error("a secretKey for the session must be provided")
-    return (req, res, next) => {
-        res.signedCookie(options.cookie)
-        req.session = {
-          sid: options.cookie.value
-        }
-        next()
-    };
+  let expirationDate
+  if (!options.cookie.key) options.cookie.key = "connect.sid";
+  options.cookie.value = generateId();
+  if (!options.cookie.secretKey)
+    throw new Error("a secretKey for the session must be provided");
+  if(!options.cookie.expires){
+    if(options.cookie.maxAge){
+      expirationDate = new Date(Date.now() + options.cookie.maxAge);
+    }
+    expirationDate = null;
+  }else{
+    expirationDate = options.cookie.expires
   }
+  return (req, res, next) => {
+    res.signedCookie(options.cookie);
+    req.session = {
+      sid: options.cookie.value,
+      data: {},
+      expiration: expirationDate
+    };
+    const {sid, data, expiration} = req.session
+    const store = new Store(options.store);
+    store.set(sid, data, expiration)
+    next();
+  };
+}
 
-
-module.exports = { yasession }
+module.exports = { yasession };
