@@ -4,3 +4,4 @@ node_modules
 .vscode
 test.js
 eslint.config.mjs
+test2.js
