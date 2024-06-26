@@ -1,6 +1,5 @@
 const Session = require("./models/session.model.js");
 const { isValidObjectId } = require("mongoose");
-// eslint-disable-next-line no-unused-vars
 class Store {
   constructor(mongoClient) {
     this.client = mongoClient;
@@ -19,7 +18,7 @@ class Store {
   async set(id, sessionData, expiration) {
     try {
       await Session.updateOne(
-        { id: id },
+        { _id: id },
         { $set: { data: sessionData, expires: expiration } },
         { upsert: true }
       );
