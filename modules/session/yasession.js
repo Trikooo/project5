@@ -150,7 +150,7 @@ function createSessionProxy(session, store, res, options) {
    */
   const handleSessionUpdate = async (session, property, options, res, store) => {
     if (property != "expires") {
-      session.expires = initializeSession(res, options);d
+      session.expires = initializeSession(res, options);
       try {
         await store.set(session);
       } catch (error) {
