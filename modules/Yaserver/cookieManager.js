@@ -1,11 +1,18 @@
-const { signCookie } = require("./hashing");
+const { signCookie, verifySignedCookie } = require("./hashing");
 
 /**
  * Parses cookies from the request headers.
  * @param {Object} req - The HTTP request object.
  * @returns {Object} An object containing parsed regular and signed cookies.
  */
-function parseCookies(req) {
+/**
+ * Parses cookies from the request headers.
+ * @param {Object} req - The HTTP request object.
+ * @param {Object} res - The HTTP response object.
+ * @param {string} secretKey - The secret key used for signing the cookie.
+ * @returns {void} Modifies req.cookies to include parsed regular and signed cookies.
+ */
+function parseCookies(req, res, secretKey) {
   const { cookie } = req.headers;
   let parsedCookies = {
     cookies: {},
@@ -14,27 +21,29 @@ function parseCookies(req) {
 
   if (cookie) {
     const cookieArray = cookie.split(";");
-    for (let cookie of cookieArray) {
-      cookie = cookie.trim();
-      const [name, value] = cookie.split("=");
+    for (let cookieStr of cookieArray) {
+      cookieStr = cookieStr.trim();
+      const matchSigned = cookieStr.match(/^([^=]+)=(.+)\.(.+)$/); // Regex for signed cookies
+      const matchUnsigned = cookieStr.match(/^([^=]+)=(.+)$/); // Regex for unsigned cookies
 
-      if (name) {
-        if (!value.includes(".")) {
-          parsedCookies.cookies[name] = value;
+      if (matchSigned && secretKey) {
+        const [, key, value, signature] = matchSigned;
+        if (verifySignedCookie(value, signature, secretKey)) {
+          parsedCookies.signedCookies[key] = { value, signature };
         } else {
-          const [signedCookieValue, signature] = value.split(".");
-          parsedCookies.signedCookies[name] = {
-            value: signedCookieValue,
-            signature: signature,
-          };
+          res.deleteCookie(key);
+          console.log(
+            `Invalid signed cookie detected for ${key}, cookie has been deleted.`
+          );
         }
+      } else if (matchUnsigned) {
+        const [, key, value] = matchUnsigned;
+        if (!value.includes(".")) parsedCookies.cookies[key] = value;
       }
     }
   }
-
   return parsedCookies;
 }
-
 /**
  * Generates a string representation of a cookie based on the provided options.
  * @param {Object} options - The options for creating the cookie string.
@@ -55,18 +64,17 @@ function cookieStringifier(options = {}) {
   if (!options.secretKey) {
     cookieString = `${options.key}=${options.value}`;
   } else {
-    cookieString = signCookie(options.key, options.value, options.secretKey)
+    cookieString = signCookie(options.key, options.value, options.secretKey);
   }
 
   if (options.expires)
     cookieString += `; Expires=${options.expires.toUTCString()}`;
-  if (options.maxAge) cookieString += `; Max-Age=${options.maxAge}`;
+  if (options.maxAge) cookieString += `; Max-Age=${options.maxAge / 1000}`;
   if (options.domain) cookieString += `; Domain=${options.domain}`;
   if (options.path) cookieString += `; Path=${options.path}`;
   if (options.secure) cookieString += `; Secure`;
   if (options.httpOnly) cookieString += `; HttpOnly`;
   if (options.sameSite) cookieString += `; SameSite=${options.sameSite}`;
-
   return cookieString;
 }
 module.exports = { parseCookies, cookieStringifier };

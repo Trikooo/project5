@@ -7,7 +7,8 @@ const sessionSchema = mongoose.Schema(
       required: ["true", "an sid must be provided"]
     },
     data: Object,
-    expires: Date
+    expires: Date,
+    userId: String,
   },
   {
     timestamps: true

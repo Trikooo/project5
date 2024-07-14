@@ -21,8 +21,11 @@ function signCookie(key, value, secretKey) {
  * @param {string} secretKey - The secret key used for signing the cookie.
  * @returns {boolean} True if the signature is valid, false otherwise.
  */
-function verifySignedCookie(signedValue, secretKey) {
-  const [value, signature] = signedValue.split(".");
+function verifySignedCookie(value, signature, secretKey) {
+  if (!value || !signature) {
+    return false;
+  }
+
   const signatureToVerify = crypto
     .createHmac("sha256", secretKey)
     .update(value)
@@ -39,4 +42,21 @@ function generateId() {
   return id;
 }
 
-module.exports = { signCookie, verifySignedCookie, generateId };
+
+const genPassword = (password) => {
+  const salt = crypto.randomBytes(32).toString("hex");
+  const hash = crypto
+    .pbkdf2Sync(password, salt, 10000, 64, "sha512")
+    .toString("hex");
+  return { salt: salt, hash: hash };
+};
+
+const verifyPassword = (salt, hash, password) => {
+  const hashToVerify = crypto
+    .pbkdf2Sync(password, salt, 10000, 64, "sha512")
+    .toString("hex");
+  return hash === hashToVerify;
+};
+
+
+module.exports = { signCookie, verifySignedCookie, generateId, genPassword, verifyPassword };

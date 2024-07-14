@@ -38,11 +38,11 @@ function parseUrlEncoded(body) {
 
 function parseMultipartFormData(req) {
   let body = req.body;
-  let rawBody = body
-  const stinkBody = "\r\n" + rawBody
+  let rawBody = body;
+  const stinkBody = "\r\n" + rawBody;
   console.log(stinkBody.charCodeAt(0), stinkBody.charCodeAt(1));
   const boundary = body.split(/\r?\n|\r/, 1)[0];
-  
+
   body = body.split(boundary);
   body.shift();
   body.pop();
@@ -52,7 +52,8 @@ function parseMultipartFormData(req) {
     part = part.trim();
 
     if (part.includes("filename")) {
-      const fileRegex = /name="(.+)"; filename="(.+)"\r?\nContent-Type: (\w+\/\w+)(?:\r?\n)*([\s\S]*)/;
+      const fileRegex =
+        /name="(.+)"; filename="(.+)"\r?\nContent-Type: (\w+\/\w+)(?:\r?\n)*([\s\S]*)/;
       const match = fileRegex.exec(part);
       if (match) {
         parsedData[match[1]] = {
@@ -61,7 +62,6 @@ function parseMultipartFormData(req) {
           contentData: match[4],
         };
       }
-
     } else {
       part = part.replace(/\r?\n|\r/g, "");
       const regex = /name="(.+)"(.+)/;
@@ -74,24 +74,23 @@ function parseMultipartFormData(req) {
 
   // Write file if productImage exists
   if (parsedData.productImage && parsedData.productImage.contentData) {
-    const imageData = Buffer.from(parsedData.productImage.contentData, "latin1")
+    // eslint-disable-next-line no-undef
+    const imageData = Buffer.from(
+      parsedData.productImage.contentData,
+      "latin1"
+    );
     const filename = parsedData.productImage.filename;
 
-fs.writeFile(filename, imageData, "latin1", (err) => {
-  if (err) {
-    console.error('Error saving image:', err);
-  } else {
-    console.log('Image saved successfully.');
-  }
-});
+    fs.writeFile(filename, imageData, "latin1", (err) => {
+      if (err) {
+        console.error("Error saving image:", err);
+      } else {
+        console.log("Image saved successfully.");
+      }
+    });
   }
 
   return parsedData;
 }
 
 module.exports = { parse };
-
-
-
-
-

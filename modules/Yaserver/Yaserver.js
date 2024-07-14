@@ -2,13 +2,14 @@ const http = require("node:http");
 const fs = require("node:fs");
 const { parseUrl } = require("./urlParser");
 const { parseCookies, cookieStringifier } = require("./cookieManager");
-const { parse } = require("./dataParser");
+const { formidable } = require("formidable");
+const path = require("node:path");
 // const MultipartFormParser = require("../../modules/multipart/multipartParser.js");
-
+let secretKey
 // Class definition for Yaserver
 class Yaserver {
   constructor() {
-    this.middleware = [];
+    this.middleware = [this.bodyParser];
     this.yaserver = http.createServer();
     this.#superRes(); // extend the response object
   }
@@ -26,7 +27,7 @@ class Yaserver {
           params[splitUrl[1]] = req.url.replace(pathWithoutParams, "");
           req.params = params;
           req.parsedUrl.params = params; // Attach parameters to the parsedUrl object as well
-          req.cookies = parseCookies(req);
+          req.cookies = parseCookies(req, res, secretKey);
           // Execute middleware
           this.#executeMiddleware(req, res, 0, requestMiddleware);
         }
@@ -36,7 +37,7 @@ class Yaserver {
         if (req.method === method && req.url === url) {
           req.parsedUrl = parseUrl(req.url);
           req.params = {}; // No parameters for this URL
-          req.cookies = parseCookies(req);
+          req.cookies = parseCookies(req, res, secretKey);
           // Execute middleware
           this.#executeMiddleware(req, res, 0, requestMiddleware);
         }
@@ -102,6 +103,10 @@ class Yaserver {
       return this;
       // this method doesn't write heads, it only sets the status and doesn't send it.
     };
+    res.redirect = function (url) {
+      this.writeHead(302, { location: url });
+      this.end();
+    };
     /**
      * Sets a cookie on the response object.
      * @param {Object} options - The options for creating the cookie.
@@ -124,7 +129,7 @@ class Yaserver {
       this.setHeader("Set-Cookie", cookieString);
     };
     /**
-     * Sets a signed cookie on the response object.
+     * Sets a  cookie on the response object.
      * @param {string} key - The name of the cookie.
      * @param {string} value - The value of the cookie.
      * @param {string} secretKey - The secret key used for signing the cookie.
@@ -144,8 +149,13 @@ class Yaserver {
       }
       if (!options.secretKey)
         throw new Error("a secret key is required to set a signed cookie");
+      secretKey = options.secretKey;
       const cookieString = cookieStringifier(options);
       this.setHeader("Set-Cookie", cookieString);
+    };
+    res.deleteCookie = function (cookieName) {
+      const expiredCookie = `${cookieName}=deleted Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+      this.setHeader("Set-Cookie", expiredCookie);
     };
   }
 
@@ -232,18 +242,38 @@ class Yaserver {
   }
 
   // Method to parse the request body
-bodyParser(req, res, next) {
-      let body = [];
-      req.on("data", (chunk) => {
-        body.push(chunk);
-      });
+  bodyParser(req, res, next) {
+    // eslint-disable-next-line no-undef
+    const uploadDir = path.join(__dirname, "../../uploads");
 
-      req.on("end", () => {
-        // eslint-disable-next-line no-undef
-        req.body = Buffer.concat(body).toString("latin1");
-        parse(req);
-        next();
-      });
+    // Ensure the upload directory exists
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const form = formidable({
+      multiples: true,
+      uploadDir,
+      keepExtensions: true,
+    });
+
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      let normalizedFields = {};
+      for (const key of Object.keys(fields)) {
+        const value = fields[key];
+        if (Array.isArray(value)) {
+          normalizedFields[key] = value.length === 1 ? value[0] : value;
+        } else {
+          normalizedFields[key] = value;
+        }
+      }
+      req.fields = normalizedFields;
+      req.files = files;
+      next();
+    });
   }
 
   // Method to register router

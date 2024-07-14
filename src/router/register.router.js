@@ -1,4 +1,5 @@
 const Router = require("../../modules/Yaserver/Router.js");
+const { registerUser } = require("../controllers/register.controller.js");
 const { formidable } = require("formidable");
 const path = require("node:path");
 const fs = require("node:fs");
@@ -9,9 +10,7 @@ router.get("/register", (req, res) => {
   res.render("register.html");
 });
 
-router.post("/register", (req, res) => {
-  res.send(req.body);
-});
+router.post("/register", registerUser);
 
 router.get("/api/products/create", (req, res) => {
   res.render("createProduct.html");

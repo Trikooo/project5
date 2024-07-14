@@ -123,36 +123,36 @@
             <h2>Register</h2>
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required>
-            
+
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required>
-            
+
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
-            
-            <label for="confirm_password">Confirm Password:</label>
-            <input type="password" id="confirm_password" name="confirm_password" required>
-            
+
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required>
+
             <input type="submit" value="Register">
         </form>
     </div>
-    
+
     <!-- Sign-in link -->
     <a href="/login" id="signin-link">Sign In</a>
 
     <script>
         const title = document.getElementById('title');
         const sensitivity = 0.1; // Adjust this value for sensitivity
-        
+
         title.addEventListener('mouseenter', () => {
             document.addEventListener('mousemove', onMouseMove);
         });
-        
+
         title.addEventListener('mouseleave', () => {
             document.removeEventListener('mousemove', onMouseMove);
             title.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
         });
-        
+
         function onMouseMove(e) {
             const offsetX = (e.clientX - title.offsetLeft - title.offsetWidth / 2) * sensitivity;
             const offsetY = (e.clientY - title.offsetTop - title.offsetHeight / 2) * sensitivity * 5;
